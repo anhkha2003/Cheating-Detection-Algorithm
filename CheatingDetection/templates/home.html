@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}
+  File Upload
+{% endblock %}
+
+{% block style %}
+  <style>
+    .container {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: space-evenly;
+    }
+
+    .column {
+      flex: 1;
+      padding: 20px;
+      background-color: #333;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      border-radius: 10px;
+      margin: 1em;
+    }
+
+    .column h2 {
+      margin-top: 0;
+      font-size: 24px;
+      color: #808bd4;
+      font-weight: bold;
+    }
+
+    .upload-button {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4caf50;
+      color: antiquewhite;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      border-radius: 5px;
+    }
+
+    .upload-button:hover {
+      background-color: #e6f1ff;
+      color: #172a45;
+    }
+
+    .file-list {
+      padding-top: 1em;
+    }
+
+    .file-list-item {
+      padding: 0.4em;
+      text-align: left;
+      padding-left: 1em;
+      font-size: 15px;
+      border-radius: 5px;
+      margin-bottom: 0.5em;
+      background-color: #2b2b2b;
+      color: #ccd6f6;
+    }
+
+    .show-more {
+      text-decoration: none;
+      display: none;
+      color: #fe9160;
+      font-weight: bold;
+    }
+
+    #processBtn {
+      margin-top: 1em;
+    }
+  </style>
+{% endblock %}
+
+{% block script %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+  <script>
+    let data_files = {{data_files|safe}}
+    let code_files = {{code_files|safe}}
+
+    function display_files($input, $file_list, $more_button, files) {
+      $input.on("change", function() {
+        files = [];
+        $file_list.empty();
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+          var contents = e.target.result;
+          JSZip.loadAsync(contents).then(function (zip) {
+            zip.forEach(function (relativePath, zipEntry) { 
+              files.push(relativePath);
+            });
+
+            files.sort();
+            for (var i = 0; i < Math.min(files.length, 10); i++) {
+              $file_list.append(`<div class=\"file-list-item\">${files[i]}</div>`);
+            }
+
+            if (files.length > 10) $more_button.show();
+            else $more_button.hide();
+            show_more_files($more_button, $file_list, files);
+          });
+        }
+        reader.readAsArrayBuffer(this.files[0]);
+      });
+    }
+
+    function show_more_files($more_button, $file_list, files) {
+      $more_button.off('click').on('click', function(e) {
+        e.preventDefault();
+        var files_shown = $file_list.children().length;
+        for (var i = files_shown; i < Math.min(files.length, files_shown + 10); i++) {
+          $file_list.append(`<div class=\"file-list-item\">${files[i]}</div>`);
+        }
+        if (files_shown + 10 >= files.length) $more_button.hide();
+      })
+    }
+
+    function show_initial_files($file_list, $more_button, files) {
+      for (var i = 0; i < Math.min(files.length, 10); i++) {
+        $file_list.append(`<div class=\"file-list-item\">${files[i]}</div>`);
+      }
+      if (files.length > 10) $more_button.show();
+      else $more_button.hide();
+      show_more_files($more_button, $file_list, files);
+    }
+
+    $(document).ready(function() {
+      display_files($("#code"), $("#code-file-list"), $("#show-more-code"), code_files);
+      display_files($("#data"), $("#data-file-list"), $("#show-more-data"), data_files);
+      show_initial_files($("#code-file-list"), $("#show-more-code"), code_files);
+      show_initial_files($("#data-file-list"), $("#show-more-data"), data_files);
+    });
+  </script>
+{% endblock %}
+
+{% block body %}
+  <form action="/submissions" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="container">
+      <div style="display: flex; width: 80%;">
+        <div class="column">
+          <h2>Submission</h2>
+          <input type="file" id="code" name="code" accept=".zip" style="font-size: 14px">
+          <div class="file-list" id="code-file-list"></div>
+          <div style="padding-top: 1em"> 
+            <a href="#" class="show-more" id="show-more-code"> Show More</a>
+          </div>
+        </div>
+        <div class="column">
+          <h2>Test Data</h2>
+          <input type="file" id="data" name="data" accept=".zip" style="font-size: 14px">
+          <div class="file-list" id="data-file-list"></div>
+          <div style="padding-top: 1em">
+            <a href="#" class="show-more" id="show-more-data"> Show More</a>
+          </div>
+        </div>
+      </div>
+      <div>
+        <button type="process" id="processBtn" class="upload-button">Process</button>
+      </div>
+    </div>
+  </form>
+{% endblock %}

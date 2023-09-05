@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}
+  Submissions
+{% endblock %}
+
+{% block style %}
+  <link rel="stylesheet"
+        href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/a11y-dark.min.css">
+  <style>
+    #codeContainer {
+      position: relative;
+      width: 70%;
+      margin: auto;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      margin-top: 50px;
+    }
+
+    #copyButton {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 10px;
+      background-color: #4CAF50; /* Green */
+      border: none;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #copyButton:hover {
+      background-color: #45a049;
+    }
+
+    pre, code {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.4;
+      border-radius: 10px;
+    }
+  </style>
+{% endblock %}
+
+{% block script %}
+  <script>
+  $(document).ready(function(){
+    hljs.highlightAll();
+    $('#copyButton').click(function(){
+      var range = document.createRange();
+      range.selectNode(document.getElementById('code'));
+      window.getSelection().removeAllRanges(); 
+      window.getSelection().addRange(range); 
+      try {  
+        var successful = document.execCommand('copy');  
+        var msg = successful ? 'successful' : 'unsuccessful';  
+        console.log('Copy command was ' + msg);  
+      } catch(err) {  
+        console.log('Oops, unable to copy');  
+      }  
+      window.getSelection().removeAllRanges();
+    });
+  });
+  </script>
+{% endblock %}
+
+{% block body %}
+<div style="display: flex; justify-content: center; margin-top: 20px;">
+    <table style="width: 90%; border-collapse: collapse; color: #ccd6f6;">
+        <thead>
+            <tr style="background-color: #4CAF50; color: #dadada;">
+                <th>ID</th>
+                <th>Author</th>
+                <th>Language</th>
+                <th>Similarity</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="text-align:center">
+                <td>221414714</td>
+                <td>anhkha1004</td>
+                <td>GNU C++17 (64)</td>
+                <td>100%</td>
+            </tr>
+            <!-- Add more rows as needed -->
+        </tbody>
+    </table>
+</div>
+
+<div id="codeContainer">
+  <button id="copyButton">Copy</button>
+  <pre><code id="code">{{code}}</code></pre>
+</div>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+{% endblock %}
+

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}
+  Submissions
+{% endblock %}
+
+{% block style %}
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #fff;
+      border: 1px solid #ddd;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border: 1px solid #595656;
+      padding: 15px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #518751;
+      font-size: 18px;
+      color: #dbdbdb;
+    }
+
+    tr:hover {
+      background-color: #3e3e3e;
+      cursor: pointer;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Author</th>
+      <th>Language</th>
+      <th>Similarity</th>
+    </tr>
+    {% for item in result %}
+      <tr>
+        <td>
+          <a href="/submission/{{item.path}}" target="_blank">{{item.id}}</a>
+        </td>
+        <td>
+          <a href="https://lqdoj.edu.vn/user/{{item.name}}" target="_blank" style="text-decoration: none">{{item.name}}</a>
+        </td>
+        <td>
+          {{item.language}}
+        </td>
+        <td>
+          {{item.score}}
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

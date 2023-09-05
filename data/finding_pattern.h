@@ -9,7 +9,7 @@ namespace CountPattern {
         static const int ALPHABET_SIZE = 128;
         
         int child[ALPHABET_SIZE], go[ALPHABET_SIZE];
-        vector<int> leaf;
+        int idxLeaf = 0;
         int par = -1, link = -1;
         int nextLeaf = -1;
         char parChar; // edge par -> cur
@@ -42,11 +42,12 @@ namespace CountPattern {
                 cur = node[cur].child[c];
             }
      
-            node[cur].leaf.push_back(idx);
+            node[cur].idxLeaf = idx;
             return cur;
         }
      
         int go(int cur, char ch) { // nextState[i][c]
+            if (ch < ALPHA || ch >= Vertex::ALPHABET_SIZE) return 0;
             int c = ch - ALPHA;
             if (node[cur].go[c] == -1) {
                 if (node[cur].child[c] != -1) {
@@ -76,7 +77,7 @@ namespace CountPattern {
             if (node[cur].nextLeaf != -1) return node[cur].nextLeaf;
         
             int nxt = getLink(cur);
-            if (node[nxt].leaf.size()) {
+            if (node[nxt].idxLeaf) {
                 return node[cur].nextLeaf = nxt;
             }       
         
@@ -87,17 +88,14 @@ namespace CountPattern {
     long long countPattern(string &s, vector<string> &dict) {
         Trie aho;
 
-        int i = 0;
-        for (auto t: dict) {
-            aho.add(t, i++);
-        }
-
         int k = dict.size();
-        vector<long long> res(k);
+        vector<long long> res(k + 1);
+        vector<int> leaf(k + 1);
 
         int numChar = 0;
-        for (auto t: dict) {
-            numChar += t.size();
+        for (int i = 1; i <= k; i++) {
+            leaf[i] = aho.add(dict[i - 1], i);
+            numChar += dict[i - 1].size();
         }
 
         vector<int> cnt(numChar + 1);
@@ -116,27 +114,18 @@ namespace CountPattern {
         
             if (cnt[state] == 0) continue;
         
-            if (aho.node[state].leaf.size()) {
-                for (auto idx: aho.node[state].leaf) {
-                    res[idx] += cnt[state];
-                }
-            }
-        
             int cur = state;
-            while (aho.getNextLeaf(cur)) {
+            while (cur) {
+                res[aho.node[cur].idxLeaf] += cnt[state];
                 cur = aho.getNextLeaf(cur);
-                for (auto idx: aho.node[cur].leaf) {
-                    res[idx] += cnt[state];
-                }
             }
-        
+
             cnt[state] = 0;
         }
         
         long long ans = 0;
-        for (int i = 0; i < k; i++) {
-            ans += res[i];
-            // cout << res[i] << "\n";
+        for (int i = 1; i <= k; i++) {
+            ans += res[aho.node[leaf[i]].idxLeaf];
         }
 
         return ans;
