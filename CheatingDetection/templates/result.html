@@ -10,7 +10,7 @@
       border-collapse: collapse;
       color: #fff;
       border: 1px solid #ddd;
-      font-size: 0.9em;
+      font-size: 1em;
     }
 
     th, td {
@@ -36,18 +36,18 @@
 {% block body %}
   <table>
     <tr>
-      <th>ID</th>
-      <th>Author</th>
-      <th>Language</th>
-      <th>Similarity</th>
+      <th><a href="?order={% if order == 'sub_id' %}-sub_id{% else %}sub_id{% endif %}">ID</a></th>
+      <th><a href="?order={% if order == 'user__name' %}-user__name{% else %}user__name{% endif %}">Author</a></th>
+      <th><a href="?order={% if order == 'language' %}-language{% else %}language{% endif %}">Language</a></th>
+      <th><a href="?order={% if order == '-score' %}score{% else %}-score{% endif %}">Similarity</a></th>
     </tr>
     {% for item in result %}
       <tr>
         <td>
-          <a href="/submission/{{item.path}}" target="_blank">{{item.id}}</a>
+          <a href="/submission/{{item.sub_id}}" target="_blank">{{item.sub_id}}</a>
         </td>
         <td>
-          <a href="https://lqdoj.edu.vn/user/{{item.name}}" target="_blank" style="text-decoration: none">{{item.name}}</a>
+          <a href="https://lqdoj.edu.vn/user/{{item.user.name}}" target="_blank" style="text-decoration: none">{{item.user.name}}</a>
         </td>
         <td>
           {{item.language}}

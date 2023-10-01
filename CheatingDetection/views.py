@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.core.files.storage import default_storage
 from django.conf import settings
 from django.http import Http404
+from .models import User, Submission
 import os
 import zipfile
 import shutil
@@ -39,7 +40,7 @@ def store_and_unzip_file(file, path, folder_path):
         zip_ref.extractall(folder_path)
 
 
-def result_view(request):
+def process_view(request):
     data_path = 'data/data.zip'
     code_path = 'data/code.zip'
 
@@ -54,7 +55,8 @@ def result_view(request):
     result = run_code()
     result_stdout = result.stdout.split('\n')
 
-    result_info = []
+    submissions = []
+
     for line in result_stdout:
         content = line.split()
         if len(content) == 0:
@@ -69,16 +71,39 @@ def result_view(request):
         id = prefix[:underscore]
         name = prefix[underscore+1:]
 
-        result_info.append({
-            "score": score,
-            "id": id,
-            "name": name,
-            "language": language,
-            "path": info,
-        })
+        with open('data/Submission/' + info, 'r') as file:
+            source = file.read()
 
-    context = {"result": result_info}
+        user, _ = User.objects.get_or_create(name=name)
 
+        submissions.append(Submission(
+            sub_id=id,
+            score=score,
+            user=user,
+            language=language,
+            source=source,
+        ))
+
+    Submission.objects.bulk_create(
+        submissions,
+        update_conflicts=True,
+        unique_fields=['sub_id'],
+        update_fields=['score', 'user', 'language', 'source'],
+    )
+    return redirect('submissions')
+
+
+def result_view(request):
+    order = request.GET.get('order')
+    queryset = Submission.objects
+    if order:
+        queryset = queryset.order_by(order)
+    else:
+        queryset = queryset.order_by('-score')
+
+    page = int(request.GET.get('page', 1))
+    queryset = queryset[(page - 1) * 50 : page * 50]
+    context = {"result": queryset, "order": order}
     return render(request, 'result.html', context)
 
 
@@ -90,11 +115,14 @@ def run_code():
     return result
 
 
-def submission_view(request, file_name):
+def submission_view(request, sub_id):
     try:
-        with open('data/Submission/' + file_name, 'r') as file:
-            file_source = file.read()
-            context = {"code": file_source}
-    except FileNotFoundError:
+        submission = Submission.objects.get(sub_id=sub_id)
+        context = {"submission": submission}
+    except Submission.DoesNotExist:
         raise Http404("Invalid URL")
     return render(request, 'submission.html', context)
+
+
+def about_view(request):
+    return render(request, 'about.html')

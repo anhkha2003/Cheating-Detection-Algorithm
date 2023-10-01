@@ -80,10 +80,10 @@
         </thead>
         <tbody>
             <tr style="text-align:center">
-                <td>221414714</td>
-                <td>anhkha1004</td>
-                <td>GNU C++17 (64)</td>
-                <td>100%</td>
+                <td>{{submission.sub_id}}</td>
+                <td>{{submission.user.name}}</td>
+                <td>{{submission.language}}</td>
+                <td>{{submission.score}}</td>
             </tr>
             <!-- Add more rows as needed -->
         </tbody>
@@ -92,7 +92,7 @@
 
 <div id="codeContainer">
   <button id="copyButton">Copy</button>
-  <pre><code id="code">{{code}}</code></pre>
+  <pre><code id="code">{{submission.source}}</code></pre>
 </div>
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
 {% endblock %}

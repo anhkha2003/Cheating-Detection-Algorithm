@@ -30,7 +30,9 @@ int main() {
     cin.tie(NULL);
 
     string testDirectory = "TestData";
-    for (const auto & entry : fs::directory_iterator(testDirectory)) {
+    for (const auto & entry : fs::recursive_directory_iterator(testDirectory)) {
+        if (!fs::is_regular_file(entry)) continue;
+
         ifstream inp(entry.path());
 
         int stringCount = 0;
@@ -90,7 +92,8 @@ int main() {
 
     vector<pair<long long, fs::path>> similarList;
     string submissionDirectory = "Submission";
-    for (const auto & entry : fs::directory_iterator(submissionDirectory)) {
+    for (const auto & entry : fs::recursive_directory_iterator(submissionDirectory)) {
+        if (!fs::is_regular_file(entry)) continue;
         ifstream inputFile(entry.path());
 
         long long similarity = 0;
@@ -137,7 +140,7 @@ int main() {
     sort(similarList.begin(), similarList.end(), greater<pair<long long, fs::path>>());
 
     for (auto [score, name]: similarList) {
-        cout << score << ' ' << name << endl;
+        cout << score << ' ' << name << "\n";
     }
  
     return 0;
