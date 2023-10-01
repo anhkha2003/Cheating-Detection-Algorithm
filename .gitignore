@@ -1,3 +1,4 @@
 /data/TestData/
 /data/Submission/
 /data/*.zip
+*.sqlite3
