@@ -2,3 +2,4 @@
 /data/Submission/
 /data/*.zip
 *.sqlite3
+/CheatingDetection/__pycache__
